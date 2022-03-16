@@ -1,0 +1,20 @@
+Takes data from data base and tries its very best to 'clean' the data.
+
+It may also discard data we've deemed useless
+
+It will also 'compress' the data by doing some minor processing.
+    Example:
+        if we know we just need the combination of stock-price and volume, but volume is already stored from
+        another function, it can just point to that other functions field in the database. Basically lets try not to 
+        repeat data and try to keep the meta-data as small as possible.
+
+It will store all this 'cleaned' and 'compressed' data in a part of the DB known as "meta-data"
+    meta-data is the data that all high-intensity processing from the Decision directry will take place.
+
+The applications in this repo should be called by Decision.
+
+The applications should first check if the values it is asked to return already exist
+    in an up-to-date database table, if not, it should update the table along with
+    returning a value.
+
+applications in this repo should be as 'basic' and quick as possible 

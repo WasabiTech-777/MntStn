@@ -1,0 +1,4 @@
+Apps contains applications that currently fall into one of three categories listed as folders in 
+the directory
+
+Apps should not have direct access to any trading execution. 
