@@ -1,14 +1,13 @@
 import itertools
-import logging
 import os
 import re
 import time
 import xml.etree.ElementTree as ET
-from src.api.sec_api import SecAPI
-from src.helper import helper
+from api.sec_api import SecAPI
+from helper import helper
+from Settings.setup_logger import logging
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
 
 #TODO: refactor
 yr = '2022'
@@ -88,7 +87,7 @@ with open(edgarIndexFilePath) as file:
 
             LOGGER.info(f"Processing 13F-HR for : {splitLineCompanyInfo[1]}\n")
 
-            with open("src/resources/13F-HR-parsed-data.csv", 'a') as out_file:
+            with open("resources/13F-HR-parsed-data.csv", 'a') as out_file:
                 for child in root:
                     process_subtree(child, out_file)
 

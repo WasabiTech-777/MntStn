@@ -1,19 +1,16 @@
 import itertools
-import logging
 import time
 from api.sec_api import SecAPI
 from helper import helper
-from bs4 import BeautifulSoup
+from Settings.setup_logger import logging
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
 
 #TODO: refactor
 yr = '2022'
 qtr = '1'
 
 response = SecAPI().getMasterEdgarIndexFileByQtrAndYrApi(qtr, yr)
-print (response)
 edgarIndexFilePath = helper.downloadEdgarIndexFileAndGetPath(response, qtr, yr)
 fileCounter = 0
 
@@ -32,6 +29,6 @@ with open(edgarIndexFilePath) as file:
                 for file in filingFile.json()['directory']['item']:
                     if file['name'] == 'FilingSummary.xml':
                         xmlSummary = SecAPI().baseUrl + filingFile.json()['directory']['name'] + "/" + file['name']
-                        print('filePath: ' + xmlSummary)
+                        LOGGER.info('filePath: ' + xmlSummary)
 
 LOGGER.info("Processed " + str(fileCounter) + " 10-K files in master file.")

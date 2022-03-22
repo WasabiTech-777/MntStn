@@ -2,11 +2,13 @@ import configparser
 import logging
 import os
 import requests
+import os, sys
 
-#TODO: organize log files per app, package, etc ? 
-logging.basicConfig(filename='./resources/logs/debug.log')
+dir_path = os.path.dirname(os.path.realpath("../../../Settings/"))
+sys.path.insert(0, os.path.abspath(dir_path))
+
+from Settings.setup_logger import logging
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
 
 class SecAPI:
     def __init__(self):
