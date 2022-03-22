@@ -1,15 +1,11 @@
-import configparser
 import logging
-import os
 import requests
-import os, sys
-
-dir_path = os.path.dirname(os.path.realpath("../../../Settings/"))
-sys.path.insert(0, os.path.abspath(dir_path))
-
+import time
 from Settings.setup_logger import logging
+
 LOGGER = logging.getLogger(__name__)
 
+# Current max request rate: 10 requests/second per SEC - https://www.sec.gov/os/accessing-edgar-data 
 class SecAPI:
     def __init__(self):
         self.header = {'Host': 'www.sec.gov', 'Connection': 'close',
@@ -17,6 +13,7 @@ class SecAPI:
          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
          }
         self.baseUrl = ("https://www.sec.gov")
+        # Current max request rate: 10 requests/second per SEC - https://www.sec.gov/os/accessing-edgar-data 
 
     def getMasterEdgarIndexFileByQtrAndYrApi(self, qtrNumber, year):
         url = f"{self.baseUrl}/Archives/edgar/full-index/{year}/QTR{qtrNumber}/master.idx"
