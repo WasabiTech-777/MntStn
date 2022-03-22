@@ -1,5 +1,0 @@
-INFO:src.api.sec_api:Performing GET on: https://www.sec.gov/Archives//edgar/full-index/2022/QTR1/master.idx
-INFO:src.api.sec_api:Performing GET on: https://www.sec.gov/Archives/edgar/data/1000097/0001000097-22-000004.txt
-INFO:__main__:Processing 13F-HR for : KINGDON CAPITAL MANAGEMENT, L.L.C.
-
-INFO:src.api.sec_api:Performing GET on: https://www.sec.gov/Archives/edgar/data/1000275/0001567619-22-004096.txt
