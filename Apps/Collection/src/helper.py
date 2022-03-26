@@ -1,6 +1,11 @@
 import re
 import os
 import xml.etree.ElementTree as ET
+import pandas as pd
+
+from IPython.display import display
+
+from bs4 import BeautifulSoup
 from Settings.setup_logger import logging
 
 logger = logging.getLogger(__name__)
@@ -86,8 +91,189 @@ class helper:
                     self.process_13f_hr_subtree(child, out_file)
 
     def process_10k(filingFile, secApi):
-        with open("Apps/Collection/src/resources/10-K-parsed-data.csv", 'a') as out_file:
-                for file in filingFile.json()['directory']['item']:
-                    if file['name'] == 'FilingSummary.xml':
-                        xmlSummary = secApi.baseUrl + filingFile.json()['directory']['name'] + "/" + file['name']
-                        logger.info('filePath: ' + xmlSummary)
+        for file in filingFile.json()['directory']['item']:
+            if file['name'] == 'FilingSummary.xml':
+                xmlSummary = secApi.baseUrl + filingFile.json()['directory']['name'] + "/" + file['name']
+                base_url = xmlSummary.replace('FilingSummary.xml', '')
+
+                content = secApi.get(xmlSummary).content
+                soup = BeautifulSoup(content, 'lxml')
+
+                # find the 'myreports' tag because this contains all the individual reports submitted.
+                reports = soup.find('myreports')
+                master_reports = []
+
+                # loop through each report in the 'myreports' tag but avoid the last one as this will cause an error.
+                for report in reports.find_all('report')[:-1]:
+                    report_dict = {}
+                    report_dict['name_short'] = report.shortname.text
+                    report_dict['name_long'] = report.longname.text
+                    report_dict['position'] = report.position.text
+                    report_dict['category'] = report.menucategory.text
+                    report_dict['url'] = base_url + report.htmlfilename.text
+                    master_reports.append(report_dict)
+
+                statements_url = []
+                for report_dict in master_reports:
+                    
+                    item1 = r"Consolidated Balance Sheets"
+                    #item2 = r"Consolidated Statements of Operations and Comprehensive Income (Loss)"
+                    item3 = r"Consolidated Statements of Cash Flows"
+                    #item4 = r"Consolidated Statements of Stockholder's (Deficit) Equity"
+                    
+                    #report_list = [item1, item2, item3, item4]
+                    report_list = [item1, item3]
+                    
+                    if report_dict['name_short'] in report_list:
+                        
+                        print('-'*100)
+                        print(report_dict['name_short'])
+                        print(report_dict['url'])
+                        statements_url.append(report_dict['url'])
+
+                statements_data = []
+                for statement in statements_url:
+                    statement_data = {}
+                    statement_data['headers'] = []
+                    statement_data['sections'] = []
+                    statement_data['data'] = []
+                    
+                    content = secApi.get(statement).content
+                    report_soup = BeautifulSoup(content, 'html')
+
+                    # find all the rows, figure out what type of row it is, parse the elements, and store in the statement file list.
+                    for index, row in enumerate(report_soup.table.find_all('tr')):
+                        cols = row.find_all('td')
+    
+                        if (len(row.find_all('th')) == 0 and len(row.find_all('strong')) == 0): 
+                            reg_row = [ele.text.strip() for ele in cols]
+                            statement_data['data'].append(reg_row)
+                            
+                        elif (len(row.find_all('th')) == 0 and len(row.find_all('strong')) != 0):
+                            sec_row = cols[0].text.strip()
+                            statement_data['sections'].append(sec_row)
+                            
+                        elif (len(row.find_all('th')) != 0):            
+                            hed_row = [ele.text.strip() for ele in row.find_all('th')]
+                            statement_data['headers'].append(hed_row)
+                            
+                        else:            
+                            logger.info("Parsed an html file with a case we haven't handled yet.")
+            
+                    statements_data.append(statement_data)
+
+                print(" ")
+                print(" ")
+                print(" ============= statement_data ========================== ")
+                print(" ")
+                print(" ")
+                print(str(statements_data))
+
+
+                print(" ============= income_dftest ========================== ")
+                print(" ")
+                print(" ")
+                income_dftest = pd.DataFrame(statements_data)
+
+                print(income_dftest.to_string())
+                print(income_dftest.head())
+
+                display(income_dftest)
+
+                income_header =  statements_data[1]['headers'][1]
+                income_data = statements_data[1]['data']
+
+                print("income data test")
+                print(income_data)
+
+                income_data_parsed = []
+                dataLength = len(income_data[0])
+                for data in income_data:
+                    if len(data) < dataLength:
+                        continue
+                    income_data_parsed.append(data)
+                
+
+                print("================== income_data_parsed ===================== ")
+                print((income_data_parsed))
+
+                print(" ")
+                print(" ")
+                print(" ==================INCOME_HEADER ===================== ")
+                print(" ")
+                print(" ")
+                print(str(income_header))
+
+                print(" ")
+                print(" ")
+                print(" ================== income_data ===================== ")
+                print(" ")
+                print(" ")
+                print(str(income_data))
+
+                # Put the data in a DataFrame
+                income_df = pd.DataFrame(income_data_parsed)
+
+                print(" ================== TESTING ===================== ")
+                print(income_df)
+
+                # Display
+                print('-'*100)
+                print('Before Reindexing')
+                print('-'*100)
+                print(f"{income_df.head()}")
+
+                # Define the Index column, rename it, and we need to make sure to drop the old column once we reindex.
+                income_df.index = income_df[0]
+                income_df.index.name = 'Category'
+                income_df = income_df.drop(0, axis = 1)
+
+                # Display
+                print('-'*100)
+                print('Before Regex')
+                print('-'*100)
+                print(f"{income_df.head()}")
+
+                # Get rid of the '$', '(', ')', and convert the '' to NaNs.
+                income_df = income_df.replace('[\$,)]','', regex=True )
+                income_df = income_df.replace('[(]','-', regex=True)
+                income_df = income_df.replace('', 'NaN', regex=True)
+                income_df = income_df.replace('[1]', 'NaN', regex=False)
+
+                # Display
+                print('-'*100)
+                print('Before type conversion')
+                print('-'*100)
+                print(f"{income_df.head()}")
+
+                print(" ")
+                print(" ")
+                print(" ================== income_df ===================== ")
+                print(f"{income_df}")
+
+                income_df = income_df.loc[:, ~income_df.apply(lambda x: x.nunique() == 1 and x[0]=='NaN', axis=0)]
+                print(" ================== testyyy ===================== ")
+                print(income_df)
+
+                # everything is a string, so let's convert all the data to a float.
+                income_df = income_df.astype(float)
+
+                # Change the column headers
+                income_df.columns = income_header
+
+                # Display
+                print('-'*100)
+                print('Final Product')
+                print('-'*100)
+
+                # show the dataframe
+                display(income_df)
+
+                # drop the data in a CSV file if need be.
+                income_df.to_csv('Apps/Collection/src/resources/test-income-state.csv')
+
+
+                
+                
+
+                    

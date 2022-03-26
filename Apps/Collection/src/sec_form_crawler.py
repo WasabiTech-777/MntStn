@@ -13,10 +13,11 @@ qtr = '1'
 
 response = sec_Api.getMasterEdgarIndexFileByQtrAndYrApi(qtr, yr)
 edgarIndexFilePath = helper.downloadEdgarIndexFileAndGetPath(response, qtr, yr)
+logger.info(f"yeeeeeet ----------- {edgarIndexFilePath}")
 fileCounter13fhr = 0
 fileCounter10k = 0
 
-with open(edgarIndexFilePath) as file:
+with open(r"C:\Users\IIrickyII\git\MntStn\Apps\Collection\src\resources\edgar-full-index-archives\master-2022-QTR1-test.txt") as file:
     for line in itertools.islice(file, 11, None):
         splitLineCompanyInfo = line.strip().split("|")
 
