@@ -13,7 +13,6 @@ qtr = '1'
 
 response = sec_Api.getMasterEdgarIndexFileByQtrAndYrApi(qtr, yr)
 edgarIndexFilePath = helper.downloadEdgarIndexFileAndGetPath(response, qtr, yr)
-logger.info(f"yeeeeeet ----------- {edgarIndexFilePath}")
 fileCounter13fhr = 0
 fileCounter10k = 0
 

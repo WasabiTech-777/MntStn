@@ -94,12 +94,11 @@ class helper:
         for file in filingFile.json()['directory']['item']:
             if file['name'] == 'FilingSummary.xml':
                 xmlSummary = secApi.baseUrl + filingFile.json()['directory']['name'] + "/" + file['name']
+                logger.info(f"Searching through: {xmlSummary}")
                 base_url = xmlSummary.replace('FilingSummary.xml', '')
-
                 content = secApi.get(xmlSummary).content
                 soup = BeautifulSoup(content, 'lxml')
 
-                # find the 'myreports' tag because this contains all the individual reports submitted.
                 reports = soup.find('myreports')
                 master_reports = []
 
@@ -115,17 +114,15 @@ class helper:
 
                 statements_url = []
                 for report_dict in master_reports:
-                    
                     item1 = r"Consolidated Balance Sheets"
-                    #item2 = r"Consolidated Statements of Operations and Comprehensive Income (Loss)"
-                    item3 = r"Consolidated Statements of Cash Flows"
-                    #item4 = r"Consolidated Statements of Stockholder's (Deficit) Equity"
-                    
-                    #report_list = [item1, item2, item3, item4]
-                    report_list = [item1, item3]
-                    
+                    item2 = r"Consolidated Statements of Operations and Comprehensive Income (Loss)"
+                    item3 = r"Consolidated Statements of Operations"
+                    item4 = r"Consolidated Statements of Cash Flows"
+                    item5 = r"Consolidated Statement of Changes in Stockholders' Equity and Changes in Net Assets"
+                    item6 = r"Consolidated Statements of Stockholder's (Deficit) Equity"
+                    report_list = [item1, item2, item3, item4, item5, item6]
+
                     if report_dict['name_short'] in report_list:
-                        
                         print('-'*100)
                         print(report_dict['name_short'])
                         print(report_dict['url'])
@@ -139,7 +136,7 @@ class helper:
                     statement_data['data'] = []
                     
                     content = secApi.get(statement).content
-                    report_soup = BeautifulSoup(content, 'html')
+                    report_soup = BeautifulSoup(content, 'html.parser')
 
                     # find all the rows, figure out what type of row it is, parse the elements, and store in the statement file list.
                     for index, row in enumerate(report_soup.table.find_all('tr')):
@@ -147,6 +144,8 @@ class helper:
     
                         if (len(row.find_all('th')) == 0 and len(row.find_all('strong')) == 0): 
                             reg_row = [ele.text.strip() for ele in cols]
+                            print("ROW -----------------------------")
+                            print(reg_row)
                             statement_data['data'].append(reg_row)
                             
                         elif (len(row.find_all('th')) == 0 and len(row.find_all('strong')) != 0):
@@ -162,52 +161,57 @@ class helper:
             
                     statements_data.append(statement_data)
 
-                print(" ")
-                print(" ")
                 print(" ============= statement_data ========================== ")
                 print(" ")
                 print(" ")
                 print(str(statements_data))
 
+                income_header =  statements_data[2]['headers'][0]
+                income_data = statements_data[2]['data']
+                #income_data = [obj['data'] for obj in statements_data]
 
                 print(" ============= income_dftest ========================== ")
                 print(" ")
                 print(" ")
+
                 income_dftest = pd.DataFrame(statements_data)
 
-                print(income_dftest.to_string())
-                print(income_dftest.head())
+                income_dftest.to_csv('Apps/Collection/src/resources/test.csv')
 
+                print("income_dftest")
                 display(income_dftest)
 
-                income_header =  statements_data[1]['headers'][1]
-                income_data = statements_data[1]['data']
-
                 print("income data test")
-                print(income_data)
+                display(income_data)
+
+                #print("income data test")
+                #print(income_data)
 
                 income_data_parsed = []
                 dataLength = len(income_data[0])
                 for data in income_data:
-                    if len(data) < dataLength:
+                    if len(data) != dataLength:
+                        continue
+                    if data[0].startswith('[1]'):
+                        print("yoo")
+                        print(data[0])
                         continue
                     income_data_parsed.append(data)
-                
 
                 print("================== income_data_parsed ===================== ")
                 print((income_data_parsed))
 
-                print(" ")
-                print(" ")
+                #print(" ")
+                #print(" ")
                 print(" ==================INCOME_HEADER ===================== ")
                 print(" ")
-                print(" ")
+                #print(" ")
                 print(str(income_header))
 
-                print(" ")
-                print(" ")
+                #print(" ")
+                #print(" ")
                 print(" ================== income_data ===================== ")
-                print(" ")
+                #print(" ")
                 print(" ")
                 print(str(income_data))
 
@@ -218,10 +222,10 @@ class helper:
                 print(income_df)
 
                 # Display
-                print('-'*100)
-                print('Before Reindexing')
-                print('-'*100)
-                print(f"{income_df.head()}")
+                #print('-'*100)
+                #print('Before Reindexing')
+                #print('-'*100)
+                #print(f"{income_df.head()}")
 
                 # Define the Index column, rename it, and we need to make sure to drop the old column once we reindex.
                 income_df.index = income_df[0]
@@ -234,22 +238,30 @@ class helper:
                 print('-'*100)
                 print(f"{income_df.head()}")
 
-                # Get rid of the '$', '(', ')', and convert the '' to NaNs.
                 income_df = income_df.replace('[\$,)]','', regex=True )
                 income_df = income_df.replace('[(]','-', regex=True)
+               # income_df = income_df.replace('[]0-9[]', '', regex=True)
                 income_df = income_df.replace('', 'NaN', regex=True)
                 income_df = income_df.replace('[1]', 'NaN', regex=False)
-
+                income_df = income_df.replace('[2]', 'NaN', regex=False)
+                income_df = income_df.replace('[3]', 'NaN', regex=False)
+                income_df = income_df.replace('[4]', 'NaN', regex=False)
+                income_df = income_df.replace('[5]', 'NaN', regex=False)
+                income_df = income_df.replace('[6]', 'NaN', regex=False)
+                income_df = income_df.replace('[7]', 'NaN', regex=False)
+                income_df = income_df.replace('[8]', 'NaN', regex=False)
+                income_df = income_df.replace('[9]', 'NaN', regex=False)
+                
                 # Display
                 print('-'*100)
                 print('Before type conversion')
                 print('-'*100)
                 print(f"{income_df.head()}")
 
-                print(" ")
-                print(" ")
-                print(" ================== income_df ===================== ")
-                print(f"{income_df}")
+                #print(" ")
+                #print(" ")
+                #print(" ================== income_df ===================== ")
+                #print(f"{income_df}")
 
                 income_df = income_df.loc[:, ~income_df.apply(lambda x: x.nunique() == 1 and x[0]=='NaN', axis=0)]
                 print(" ================== testyyy ===================== ")
