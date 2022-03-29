@@ -1,5 +1,5 @@
-import logging
 import requests
+import logging
 import time
 from Settings.setup_logger import logging
 
