@@ -1,1 +1,19 @@
-This will likely be a server that we create locally and tunnel into.
+How To Connect:
+    ssh <user_name>@174.74.56.102 -p 55255
+    type password
+    sudo -i -u postgres
+    psql -d central_db
+    \\ now you should be logged in to the central_db
+
+
+Usefull Commands in PSQL:
+    Lists cuurent databases:
+        \l 
+    
+    Connection info:
+        \conninfo
+    
+    Quit:
+        \q
+
+
