@@ -15,5 +15,8 @@ Usefull Commands in PSQL:
     
     Quit:
         \q
+<<<<<<< HEAD
+=======
 
 
+>>>>>>> bab48da4fa8fbf5eefce2940eec3ba88ed044232
