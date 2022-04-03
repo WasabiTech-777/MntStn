@@ -24,7 +24,7 @@ sql = '''CREATE TABLE TEMPTEST(company_name varchar(63),\
     num15 int, num16 int, num17 int);'''
   
   
-cursor.execute(sql)
+#cursor.execute(sql)
   
 sql2 = '''COPY details(employee_id,employee_name,\
 employee_email,employee_salary)
