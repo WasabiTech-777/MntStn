@@ -1,0 +1,12 @@
+Description:           Master Index of EDGAR Dissemination Feed
+Last Data Received:    March 25, 2022
+Comments:              webmaster@sec.gov
+Anonymous FTP:         ftp://ftp.sec.gov/edgar/
+Cloud HTTP:            https://www.sec.gov/Archives/
+
+ 
+ 
+ 
+CIK|Company Name|Form Type|Date Filed|Filename
+--------------------------------------------------------------------------------
+1000209|MEDALLION FINANCIAL CORP|10-K|2022-03-14|edgar/data/1000209/0000950170-22-003603.txt
