@@ -18,7 +18,15 @@ print(conn)
 
 conn.autocommit = True
 cursor = conn.cursor()
-  
+
+#nameOfIssuer,cusip,value,shares,sshPrnamtType,putCall,investmentDiscretion,otherManager,soleVotingAuthority,sharedVotingAuthority,noneVotingAuthority
+#ABBOTT LABS,002824100,8444,60000,SH,,SOLE,,60000,0,0
+
+def sql_table_string_generator(nameOfIssuer,cusip,value,shares,sshPrnamtType,putCall,investmentDiscretion,
+                               otherManager,soleVotingAuthority,sharedVotingAuthority,noneVotingAuthority):
+    pass
+
+
 #ARGENX SE,04016X101,9766,27889,SH,,DFND,1,2,3,4,27889,0,0
 sql = '''CREATE TABLE TEMPTEST(company_name varchar(63),\
     filling_date varchar(30),\
@@ -26,7 +34,8 @@ sql = '''CREATE TABLE TEMPTEST(company_name varchar(63),\
     cmp_ticker2 varchar(30), num11 int, num12 int, num13 int, num14 int,\
     num15 int, num16 int, num17 int);'''
   
-  
+
+
 #cursor.execute(sql)
 f = open(r'Apps/Collection/src/resources/13F-HR-parsed-data.csv', 'r')
 cursor.copy_from(f, 'temptest', sep=',')
