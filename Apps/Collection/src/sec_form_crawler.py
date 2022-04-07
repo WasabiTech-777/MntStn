@@ -30,7 +30,7 @@ with open(edgarIndexFilePath) as file:
             logger.info(f"Processing 13F-HR for : {companyName}\n")
             filingFile = sec_Api.get13FHRFilingForCompanyApi(splitLineCompanyInfo)
             time.sleep(1/10)
-            helper().process_13f_hr(filingFile)
+            helper().process_13f_hr(filingFile, companyInfoTuple)
 
         elif(companyFiling == "10-K"):
             companyInfoTuple = (companyName, companyFiling, qtr, yr)
@@ -38,7 +38,6 @@ with open(edgarIndexFilePath) as file:
             logger.info(f"Processing 10-K for : {companyName}\n")
             filingFile = sec_Api.get10kFilingForCompanyApi(splitLineCompanyInfo)
             time.sleep(1/10)
-        
             helper.process_10k(filingFile, sec_Api, companyInfoTuple)
 
 logger.info("Processed " + str(fileCounter13fhr) + " 13F-HR files in master file.")

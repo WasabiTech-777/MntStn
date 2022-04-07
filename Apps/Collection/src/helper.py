@@ -1,3 +1,4 @@
+import csv
 import re
 import os
 import xml.etree.ElementTree as ET
@@ -26,7 +27,7 @@ class helper:
 
         return edgarIndexFileDownloadPath
 
-    def process_13f_hr_subtree(self, subtree, out_file):
+    def process_13f_hr_subtree(self, subtree, writer):
         nameOfIssuer = ''
         cusip = ''
         value = ''
@@ -73,10 +74,10 @@ class helper:
                         otherManager = child.text
 
         nameOfIssuer = nameOfIssuer.replace(",", "")
-        line = nameOfIssuer + ',' + cusip + ',' + value + ',' + shares + ',' + sshPrnamtType + ',' + putCall + ',' + investmentDiscretion + "," + otherManager + ',' + soleVotingAuthority + ',' + sharedVotingAuthority + ',' + noneVotingAuthority + "\n"
-        out_file.write(line)
+        line = [nameOfIssuer, cusip, value, shares, sshPrnamtType, putCall, investmentDiscretion, otherManager, soleVotingAuthority, sharedVotingAuthority, noneVotingAuthority]
+        writer.writerow(line)
 
-    def process_13f_hr(self, filingFile):
+    def process_13f_hr(self, filingFile, companyInfoTuple):
 
         pattern = b'<(.*?)informationTable\s|<informationTable'
         matchInformationTableStart = re.search(pattern, filingFile.content)
@@ -86,10 +87,20 @@ class helper:
 
         fileByteString = filingFile.content[matchInformationTableStart.start() : match2InformationTableEnd.end()]
         root = ET.fromstring(fileByteString.decode())
+     	
+        headerLine = ["nameOfIssuer","cusip", "value", "shares", "sshPrnamtType", "putCall", "investmentDiscretion", "otherManager", "soleVotingAuthority", "sharedVotingAuthority", "noneVotingAuthority"]
 
-        with open("Apps/Collection/src/resources/13F-HR-parsed-data.csv", 'a') as out_file:
+        path = f"{os.path.dirname(__file__)}/resources/companies/{companyInfoTuple[0]}/filings/13f-hr-filing/{companyInfoTuple[3]}/{companyInfoTuple[2]}"
+        p = Path(path)
+        p.mkdir(parents=True,exist_ok=True)
+
+        newPath = f"{os.path.dirname(__file__)}/resources/companies/{companyInfoTuple[0]}/filings/13f-hr-filing/{companyInfoTuple[3]}/{companyInfoTuple[2]}/13f-hr-data.csv"
+
+        with open(newPath, 'w',  newline='') as out_file:
+                writer = csv.writer(out_file)
+                writer.writerow(headerLine)
                 for child in root:
-                    self.process_13f_hr_subtree(child, out_file)
+                    self.process_13f_hr_subtree(child, writer)
 
     def process_10k(filingFile, secApi, companyInfoTuple):
         for file in filingFile.json()['directory']['item']:
