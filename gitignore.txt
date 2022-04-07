@@ -1,6 +1,0 @@
-Apps/Collection/src/__pycache__/helper.cpython-310.pyc
-Apps/Collection/src/__pycache__/sec_form_crawler.cpython-310.pyc
-Apps/Collection/src/api/__pycache__/sec_api.cpython-310.pyc
-Apps/Collection/src/resources/companies/ROYAL_BANK_OF_CANADA/filings/13f-hr-filing/2022/1/13f-hr-data.csv
-Apps/Collection/src\resources\edgar-full-index-archives\master-2022-QTR1.txt
-Settings/__pycache__/setup_logger.cpython-310.pyc
