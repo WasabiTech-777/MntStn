@@ -19,12 +19,31 @@ print(conn)
 conn.autocommit = True
 cursor = conn.cursor()
 
-#nameOfIssuer,cusip,value,shares,sshPrnamtType,putCall,investmentDiscretion,otherManager,soleVotingAuthority,sharedVotingAuthority,noneVotingAuthority
-#ABBOTT LABS,002824100,8444,60000,SH,,SOLE,,60000,0,0
 
-def sql_table_string_generator(nameOfIssuer,cusip,value,shares,sshPrnamtType,putCall,investmentDiscretion,
-                               otherManager,soleVotingAuthority,sharedVotingAuthority,noneVotingAuthority):
-    pass
+class sql_parser:
+    def __init__(self, nameOfIssuer, cusip, value, shares, sshPrnamtType,
+                putCall, investmentDiscretion, otherManager,
+                soleVotingAuthority, sharedVotingAuthority, noneVotingAuthority):
+        
+        self.nameOfIssuer = nameOfIssuer
+        self.cusip = cusip
+        self.value = value
+        self.shares = shares
+        self.sshPrnamtType = sshPrnamtType
+        self.putCall = putCall
+        self.investmentDiscretion = investmentDiscretion
+        self.otherManager = otherManager
+        self.soleVotingAuthority = soleVotingAuthority
+        self.sharedVotingAuthority = sharedVotingAuthority
+        self.noneVotingAuthority = noneVotingAuthority
+    
+    def csv_to_psql_company_table_generator(self):
+        sql_command = f"CREATE TABLE {self.nameOfIssuer}(company_name varchar(63),\
+            cusip int, value int, shares int, sshPrnamtType varchar(30), putCall varchar(16) ,\
+            investmentDiscretion varchar(12), otherManager varchar(99), soleVotingAuthority int,\
+            sharedVotingAuthority int, noneVotingAuthority int);"
+    
+
 
 
 #ARGENX SE,04016X101,9766,27889,SH,,DFND,1,2,3,4,27889,0,0
