@@ -101,6 +101,8 @@ class helper:
                 writer.writerow(headerLine)
                 for child in root:
                     self.process_13f_hr_subtree(child, writer)
+                    
+        
 
     def process_10k(filingFile, secApi, companyInfoTuple):
         for file in filingFile.json()['directory']['item']:
@@ -125,6 +127,7 @@ class helper:
 
                 statements_url = []
                 for report_dict in master_reports:
+                    #short name html header
                     item1 = r"Consolidated Balance Sheets"
                     item2 = r"Consolidated Statements of Operations and Comprehensive Income (Loss)"
                     item3 = r"Consolidated Statements of Operations"
@@ -175,7 +178,7 @@ class helper:
                     properHeaders = []
                     for headers in headerNestedList:
                         for column in headers:
-                            if (column != "12 Months Ended"):
+                            if (column != "12 Months Ended" or column != "9 Months Ended" or column != "3 Months Ended"):
                                 properHeaders.append(column)
                     headersOfFinancialStatements.append(properHeaders)
 
@@ -184,10 +187,14 @@ class helper:
                     headersOfFinancialStatementsColumnLengths.append(len(headers))
                 dataOfFinancialStatements = []
 
-                for dataNestedList in allData:
+
+                for index, dataNestedList in enumerate(allData):
                     properData = []
                     for data in dataNestedList:
-                        if len(data) < len(headersOfFinancialStatementsColumnLengths):
+                        #print(f"DATA is: {len(data)}")
+                        #print(f"len dATA is: {data}")
+                        #print(f"len(headersOfFinancialStatementsColumnLengths) is: {len(headersOfFinancialStatementsColumnLengths)}")
+                        if len(data) < headersOfFinancialStatementsColumnLengths[index]:
                             break
                         else:
                             properData.append(data)
@@ -195,9 +202,16 @@ class helper:
                 
                 for index, financialStatement in enumerate(dataOfFinancialStatements):
                     dataFrame = pd.DataFrame(financialStatement)
-
+                    # print(f"\n\n\nindex length: {enumerate(dataOfFinancialStatements)} \n index: {index} \n financial Statement: {financialStatement}\n\n\n")
                     # Define the Index column, rename it, drop the old column after reindexing
-                    dataFrame.index = dataFrame[0]
+                    # fail: raise KeyError(key) from err
+                    try:
+                        dataFrame.index = dataFrame[0]
+                    
+                    except(KeyError):
+                        logger.info(f"financial statement empty.\nignoring and continuing\n")
+                        continue
+                
                     dataFrame.index.name = headersOfFinancialStatements[index][0]
                     dataFrame = dataFrame.drop(0, axis = 1)
 
@@ -214,7 +228,7 @@ class helper:
                     dataFrame = dataFrame.replace('[7]', 'NaN', regex=False)
                     dataFrame = dataFrame.replace('[8]', 'NaN', regex=False)
                     dataFrame = dataFrame.replace('[9]', 'NaN', regex=False)
-
+                    dataFrame = dataFrame.replace('%', '', regex=True)
 
                     dataFrame = dataFrame.loc[:, ~dataFrame.apply(lambda x: x.nunique() == 1 and x[0]=='NaN', axis=0)]
                     dataFrame = dataFrame.astype(float)
