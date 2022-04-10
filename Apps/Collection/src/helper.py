@@ -136,7 +136,7 @@ class helper:
                     item6 = r"Consolidated Statements of Stockholder's (Deficit) Equity"
                     report_list = [item1, item2, item3, item4, item5, item6]
 
-                    if report_dict['name_short'] in report_list:
+                    if ( (report_dict['name_short'] in report_list) and ('contains' in report_dict['name_long']) ):
                         statements_url.append(report_dict['url'])
 
                 statements_data = []
@@ -163,6 +163,8 @@ class helper:
                             
                         elif (len(row.find_all('th')) != 0):            
                             hed_row = [ele.text.strip() for ele in row.find_all('th')]
+                            logger.info("\n================= statement_data INFORMATION =========\n")
+                            logger.info(f"statement_data")
                             statement_data['headers'].append(hed_row)
                             
                         else:            
@@ -174,19 +176,32 @@ class helper:
                 allData = [obj['data'] for obj in statements_data]
 
                 headersOfFinancialStatements = []
+                logger.info("\n================= allHeaders INFORMATION =========\n")
+                logger.info(f"allHeaders IS: <{allHeaders}>")
                 for headerNestedList in allHeaders:
                     properHeaders = []
                     for headers in headerNestedList:
                         for column in headers:
-                            if (column != "12 Months Ended" or column != "9 Months Ended" or column != "3 Months Ended"):
+                            if not (column == "12 Months Ended" or column == "9 Months ended" or column == "3 Months ended"):
+                                #logger.info(f"COLUMN class IS: {type(column)}")
+                                #logger.info(f"COLUMN IS: <{column}>")
                                 properHeaders.append(column)
                     headersOfFinancialStatements.append(properHeaders)
+
+                logger.info("\n================= headersOfFinancialStatements INFORMATION =========\n")
+                logger.info(f"headersOfFinancialStatements IS: <{headersOfFinancialStatements}>")
 
                 headersOfFinancialStatementsColumnLengths = []
                 for index, headers in enumerate(headersOfFinancialStatements):
                     headersOfFinancialStatementsColumnLengths.append(len(headers))
                 dataOfFinancialStatements = []
 
+
+                logger.info("\n================= HEADER INFORMATION =========\n")
+                logger.info(headersOfFinancialStatements)
+
+                logger.info("\n================= data INFORMATION =========\n")
+                logger.info(dataOfFinancialStatements)
 
                 for index, dataNestedList in enumerate(allData):
                     properData = []
@@ -209,7 +224,7 @@ class helper:
                         dataFrame.index = dataFrame[0]
                     
                     except(KeyError):
-                        logger.info(f"financial statement empty.\nignoring and continuing\n")
+                        logger.info(f"Financial statement is empty.\nIgnoring and continuing on.\n")
                         continue
                 
                     dataFrame.index.name = headersOfFinancialStatements[index][0]
@@ -220,6 +235,11 @@ class helper:
                     #income_df = income_df.replace('[]0-9[]', '', regex=True)
                     dataFrame = dataFrame.replace('', 'NaN', regex=True)
                     dataFrame = dataFrame.replace('[1]', 'NaN', regex=False)
+                    dataFrame = dataFrame.replace('[1],[2]', 'NaN', regex=False)
+                    dataFrame = dataFrame.replace('[1][2]', 'NaN', regex=False)
+                    dataFrame = dataFrame.replace('[1][3]', 'NaN', regex=False)
+                    dataFrame = dataFrame.replace('[1][2][3]', 'NaN', regex=False)
+                    dataFrame = dataFrame.replace('[2][3]', 'NaN', regex=False)
                     dataFrame = dataFrame.replace('[2]', 'NaN', regex=False)
                     dataFrame = dataFrame.replace('[3]', 'NaN', regex=False)
                     dataFrame = dataFrame.replace('[4]', 'NaN', regex=False)
@@ -231,25 +251,52 @@ class helper:
                     dataFrame = dataFrame.replace('%', '', regex=True)
 
                     dataFrame = dataFrame.loc[:, ~dataFrame.apply(lambda x: x.nunique() == 1 and x[0]=='NaN', axis=0)]
-                    dataFrame = dataFrame.astype(float)
+                    
+                    #dataFrame = dataFrame.astype(float)
 
                     keyList = dataFrame.columns.values.tolist()
                     dict = {}
+
+                    logger.info("\n================= headersOfFinancialStatements INFORMATION =========\n")
+                    logger.info(headersOfFinancialStatements)
+
+                    logger.info("\n================= dataFrame INFORMATION =========\n")
+                    logger.info(dataFrame.to_string())
+
                     for i, key in enumerate(keyList):
+                        logger.info(f"i is: {i} and key is: {key} and keyList is {keyList}")
                         dict[key] = headersOfFinancialStatements[index][i + 1]
 
                     dataFrame.rename(columns=dict, inplace=True)
 
                     reportListName = headersOfFinancialStatements[index][0].strip()
                     reportListName = reportListName.replace(' ', '')
+                    reportListName = reportListName.replace('$', '')
+                    reportListName = reportListName.replace(',', '')
+                    reportListName = reportListName.replace(')', '')
+                    reportListName = reportListName.replace('(', '')
+                    reportListName = reportListName.replace('-', '')
+                    reportListName = reportListName.replace(r'/', '')
+                    reportListName = reportListName.replace('\\', '')
 
                     path = f"{os.path.dirname(__file__)}/resources/companies/{companyInfoTuple[0]}/filings/10-k-filing/{companyInfoTuple[3]}/{companyInfoTuple[2]}"
                     p = Path(path)
                     p.mkdir(parents=True,exist_ok=True)
 
-                    newPath = f"{os.path.dirname(__file__)}/resources/companies/{companyInfoTuple[0]}/filings/10-k-filing/{companyInfoTuple[3]}/{companyInfoTuple[2]}/{reportListName}.csv"
-                    newP = Path(newPath)
-                    dataFrame.to_csv(newP, index = True, header = True)
+                    #newPath = path + "/"
+                    #p = Path(newPath)
+                    #newP = Path(newPath)
+
+                    #logger.info("\n\n================================================= {path}===========================\n")
+                    #logger.info(path)
+
+                    #logger.info("\n\n================================================= {path}/{reportListName}.csv ===========================\n")
+                    #logger.info(f"{path}/{reportListName}.csv")
+
+                    #logger.info("\n\n================================================= DATA FRAME ===========================\n")
+                    #logger.info(dataFrame.to_string())
+
+                    dataFrame.to_csv(f"{path}/{reportListName}.csv", index = True, header = True)
 
 
                 

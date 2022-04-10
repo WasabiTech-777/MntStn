@@ -22,7 +22,6 @@ logger.info(f"{edgarIndexFilePath}")
 #"/home/max/MntStn/Apps/Collection/src/resources/edgar-full-index-archives/master-2022-QTR1-test.txt"
 with open(edgarIndexFilePath) as file:
     for line in itertools.islice(file, 11, None):
-        #line = 1000045|NICHOLAS FINANCIAL INC|10-Q|2022-02-09|edgar/data/1000045/0000950170-22-000940.txt
         splitLineCompanyInfo = line.strip().split("|")    
         companyName = splitLineCompanyInfo[1].strip()
         
