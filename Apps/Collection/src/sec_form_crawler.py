@@ -4,6 +4,8 @@ from Apps.Collection.src.api.sec_api import SecAPI
 from Apps.Collection.src.helper import helper
 from Settings.setup_logger import logging
 
+#unix socket on local?
+
 logger = logging.getLogger(__name__)
 sec_Api = SecAPI()
 
@@ -16,11 +18,14 @@ edgarIndexFilePath = helper.downloadEdgarIndexFileAndGetPath(response, qtr, yr)
 fileCounter13fhr = 0
 fileCounter10k = 0
 
+logger.info(f"{edgarIndexFilePath}")
+#"/home/max/MntStn/Apps/Collection/src/resources/edgar-full-index-archives/master-2022-QTR1-test.txt"
 with open(edgarIndexFilePath) as file:
     for line in itertools.islice(file, 11, None):
-        splitLineCompanyInfo = line.strip().split("|")
-
+        splitLineCompanyInfo = line.strip().split("|")    
         companyName = splitLineCompanyInfo[1].strip()
+        
+        #gets rid of white space in company name
         companyName = companyName.replace(' ', '_')
         companyFiling = splitLineCompanyInfo[2]
 
@@ -31,6 +36,8 @@ with open(edgarIndexFilePath) as file:
             filingFile = sec_Api.get13FHRFilingForCompanyApi(splitLineCompanyInfo)
             time.sleep(1/10)
             helper().process_13f_hr(filingFile, companyInfoTuple)
+            #pass in to sql helper companyInfoTuple
+
 
         elif(companyFiling == "10-K"):
             companyInfoTuple = (companyName, companyFiling, qtr, yr)
@@ -38,6 +45,7 @@ with open(edgarIndexFilePath) as file:
             logger.info(f"Processing 10-K for : {companyName}\n")
             filingFile = sec_Api.get10kFilingForCompanyApi(splitLineCompanyInfo)
             time.sleep(1/10)
+            #sec api is the returned object from a get request direct to sec.gov
             helper.process_10k(filingFile, sec_Api, companyInfoTuple)
 
 logger.info("Processed " + str(fileCounter13fhr) + " 13F-HR files in master file.")

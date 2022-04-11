@@ -9,49 +9,53 @@
 #will be company centric tables
 
 import psycopg2
+import csv
+import os
+import re
+
+#returns a connection type object
+def connect_to_database(database="dummy", user = "max", password = "password", host = "127.0.0.1", port = "5432"):
+        conn = psycopg2.connect(database="dummy", user = "max", password = "password", host = "127.0.0.1", port = "5432")
+        print(f"connection: {conn}\n")
+        conn.autocommit = True
+        cursor = conn.cursor()
+        return conn
+
+#returns void
+def csv_to_sql(conn, csv_file_path):
+    
+    cursor = conn.cursor()
+    directory = os.path.abspath(csv_file_path)
+    table_name = re.sub("[^a-zA-Z]+", "", directory.split('/')[-6])
+    sql_command = f'CREATE TABLE {table_name}('
+    
+    with open(csv_file_path) as file:
+        file_at = csv.reader(file)
+        for line in file_at:
+            headers = line
+            print(f"headers: {headers}\n\n")
+            break
+
+    for column in headers:
+        #varchar does not pad and is the most versitile. could be changed in future to save space
+        sql_command = sql_command + f" {column} varchar(99),"
+    
+    sql_command = sql_command.rstrip(sql_command[-1])
+    sql_command = sql_command + f");"
+    
+    try:
+        print(f"attempting to run: {sql_command} \n")
+        cursor.execute(sql_command)
+        print(f"Table : {table_name} created succesfully.\n")
+        
+    except:
+        print("failed")
+
+    
+    conn.commit()
+    conn.close()
 
 
-conn = psycopg2.connect(database="dummy", user = "max", password = "password", host = "127.0.0.1", port = "5432")
-
-print(conn)
-
-
-conn.autocommit = True
-cursor = conn.cursor()
-
-#nameOfIssuer,cusip,value,shares,sshPrnamtType,putCall,investmentDiscretion,otherManager,soleVotingAuthority,sharedVotingAuthority,noneVotingAuthority
-#ABBOTT LABS,002824100,8444,60000,SH,,SOLE,,60000,0,0
-
-def sql_table_string_generator(nameOfIssuer,cusip,value,shares,sshPrnamtType,putCall,investmentDiscretion,
-                               otherManager,soleVotingAuthority,sharedVotingAuthority,noneVotingAuthority):
-    pass
-
-
-#ARGENX SE,04016X101,9766,27889,SH,,DFND,1,2,3,4,27889,0,0
-sql = '''CREATE TABLE TEMPTEST(company_name varchar(63),\
-    filling_date varchar(30),\
-    num1 int, num2 int, cmp_ticker varchar(30), varnum varchar(30) ,\
-    cmp_ticker2 varchar(30), num11 int, num12 int, num13 int, num14 int,\
-    num15 int, num16 int, num17 int);'''
-  
-
-
-#cursor.execute(sql)
-f = open(r'Apps/Collection/src/resources/13F-HR-parsed-data.csv', 'r')
-cursor.copy_from(f, 'temptest', sep=',')
-cursor.execute("select * from temptest;")
-cursor.fetchall()
-
-  
-  
-conn.commit()
-conn.close()
-
-
-
-
-def csv_to_psql_data_table(csv_file, data_base="dummy", 
-                           user="max", password = "password", 
-                           host = "127.0.0.1", port = "5432"):
-    pass
-
+if __name__ == "__main__":
+    conn = connect_to_database()
+    csv_to_sql(conn, '/home/max/MntStn/Apps/Collection/src/resources/companies/Yakira_Capital_Management,_Inc./filings/13f-hr-filing/2022/1/13f-hr-data.csv')
