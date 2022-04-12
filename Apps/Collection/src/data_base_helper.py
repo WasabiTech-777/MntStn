@@ -23,10 +23,8 @@ def connect_to_database(database="dummy", user="max", password="password", host=
     cursor = conn.cursor()
     return conn
 
-# returns void
 
-
-def csv_to_sql(conn, csv_file_path):
+def csv_to_sql_table(conn, csv_file_path):
 
     cursor = conn.cursor()
     directory = os.path.abspath(csv_file_path)
@@ -54,15 +52,17 @@ def csv_to_sql(conn, csv_file_path):
 
         try:
             print(f"attempting to run: {sql_command} \n")
-            cursor.execute(sql_command)
-            print(f"Table : {table_name} created succesfully.\n")
-            #sql_command = f"DROP TABLE IF EXISTS {table_name}"
             #cursor.execute(sql_command)
+            print(f"Table : {table_name} created succesfully.\n")
+            sql_command = f"DROP TABLE IF EXISTS {table_name}"
+            cursor.execute(sql_command)
 
         except:
             print("failed")
 
         conn.commit()
+    
+    return
 
 
 def getListOfFiles(dirName):
@@ -87,7 +87,9 @@ def getListOfFiles(dirName):
 def read_in_companies(conn, file_path):
     listOfFiles = getListOfFiles(file_path)
     for file_at in listOfFiles:
-        csv_to_sql(conn, file_at)
+        csv_to_sql_table(conn, file_at)
+    
+    return
     
 
 
