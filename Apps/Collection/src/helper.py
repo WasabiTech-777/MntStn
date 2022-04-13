@@ -230,30 +230,14 @@ class helper:
                     dataFrame.index.name = headersOfFinancialStatements[index][0]
                     dataFrame = dataFrame.drop(0, axis = 1)
 
-                    dataFrame = dataFrame.replace('[\$,)]','', regex=True )
+
+                    dataFrame = dataFrame.replace('\[\d+\]', '', regex=True)
+                    dataFrame = dataFrame.replace('[\$,)%]','', regex=True )
                     dataFrame = dataFrame.replace('[(]','-', regex=True)
-                    #income_df = income_df.replace('[]0-9[]', '', regex=True)
                     dataFrame = dataFrame.replace('', 'NaN', regex=True)
-                    dataFrame = dataFrame.replace('[1]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[1],[2]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[1][2]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[1][3]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[1][2][3]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[2][3]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[2]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[3]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[4]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[5]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[6]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[7]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[8]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('[9]', 'NaN', regex=False)
-                    dataFrame = dataFrame.replace('%', '', regex=True)
 
                     dataFrame = dataFrame.loc[:, ~dataFrame.apply(lambda x: x.nunique() == 1 and x[0]=='NaN', axis=0)]
                     
-                    #dataFrame = dataFrame.astype(float)
-
                     keyList = dataFrame.columns.values.tolist()
                     dict = {}
 
@@ -270,12 +254,18 @@ class helper:
                     dataFrame.rename(columns=dict, inplace=True)
 
                     reportListName = headersOfFinancialStatements[index][0].strip()
+                    """"
+                    reportListName = reportListName.replace(' ', '')
                     reportListName = reportListName.replace(' ', '')
                     reportListName = reportListName.replace('$', '')
                     reportListName = reportListName.replace(',', '')
                     reportListName = reportListName.replace(')', '')
                     reportListName = reportListName.replace('(', '')
                     reportListName = reportListName.replace('-', '')
+                    reportListName = reportListName.replace(r'/', '')
+                    reportListName = reportListName.replace('\\', '')
+                    """
+                    reportListName = re.sub('[\$,)(-]', '', reportListName)
                     reportListName = reportListName.replace(r'/', '')
                     reportListName = reportListName.replace('\\', '')
 

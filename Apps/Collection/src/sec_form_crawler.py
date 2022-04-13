@@ -24,9 +24,8 @@ with open(edgarIndexFilePath) as file:
     for line in itertools.islice(file, 11, None):
         splitLineCompanyInfo = line.strip().split("|")    
         companyName = splitLineCompanyInfo[1].strip()
-        
-        #gets rid of white space in company name
-        companyName = companyName.replace(' ', '_')
+        companyName = companyName.replace(',', '')
+        companyName = companyName.replace(' ', '-')
         companyFiling = splitLineCompanyInfo[2]
 
         if(companyFiling == "13F-HR"):
