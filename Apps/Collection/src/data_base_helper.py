@@ -24,6 +24,47 @@ def connect_to_database(database="dummy", user="max", password="password", host=
     return conn
 
 
+def fill_in_table(conn, csv_file_path, delimeter = ","):
+    cursor = conn.cursor()
+    directory = os.path.abspath(csv_file_path)
+    file_type = directory.split('/')[-1]
+    
+    if(file_type == "13f-hr-data.csv"):
+        table_name = re.sub("[^a-zA-Z]+", "", directory.split('/')[-6])
+        sql_command = f"COPY {table_name}\
+            FROM '{csv_file_path}'\
+            DELIMITER '{delimeter}'\
+            CSV HEADER;"
+        
+        cursor.execute(sql_command)
+        return
+
+
+def delete_tables_all_13f(conn, csv_file_path):
+    cursor = conn.cursor()
+    directory = os.path.abspath(csv_file_path)
+    file_type = directory.split('/')[-1]
+    print(f"file type: {file_type} \n")
+
+    if(file_type == "13f-hr-data.csv"):
+        table_name = re.sub("[^a-zA-Z]+", "", directory.split('/')[-6])
+        sql_command = f'CREATE TABLE {table_name}('
+
+        try:
+            sql_command = f"DROP TABLE IF EXISTS {table_name}"
+            print(f"attempting to run: {sql_command} \n")
+            cursor.execute(sql_command)
+            print(f"Table : {table_name} Deleted succesfully.\n")
+
+        except:
+            print("failed")
+
+        conn.commit()
+    
+    else:
+        print(f"Not a 13f")
+    
+
 def csv_to_sql_table(conn, csv_file_path):
 
     cursor = conn.cursor()
@@ -52,10 +93,10 @@ def csv_to_sql_table(conn, csv_file_path):
 
         try:
             print(f"attempting to run: {sql_command} \n")
-            #cursor.execute(sql_command)
-            print(f"Table : {table_name} created succesfully.\n")
-            sql_command = f"DROP TABLE IF EXISTS {table_name}"
             cursor.execute(sql_command)
+            print(f"Table : {table_name} created succesfully.\n")
+            fill_in_table(conn, csv_file_path)
+            print(f"Table : {table_name} filled succesfully.\n")
 
         except:
             print("failed")
@@ -65,7 +106,7 @@ def csv_to_sql_table(conn, csv_file_path):
     return
 
 
-def getListOfFiles(dirName):
+def get_list_of_files(dirName):
     # create a list of file and sub directories 
     # names in the given directory 
     listOfFile = os.listdir(dirName)
@@ -76,16 +117,23 @@ def getListOfFiles(dirName):
         fullPath = os.path.join(dirName, entry)
         # If entry is a directory then get the list of files in this directory 
         if os.path.isdir(fullPath):
-            allFiles = allFiles + getListOfFiles(fullPath)
+            allFiles = allFiles + get_list_of_files(fullPath)
         else:
             allFiles.append(fullPath)
                 
     return allFiles
 
 
+def delete_all_companies(conn, file_path):
+    listOfFiles = get_list_of_files(file_path)
+    for file_at in listOfFiles:
+        delete_tables_all_13f(conn, file_at)
+    
+    return
+
 
 def read_in_companies(conn, file_path):
-    listOfFiles = getListOfFiles(file_path)
+    listOfFiles = get_list_of_files(file_path)
     for file_at in listOfFiles:
         csv_to_sql_table(conn, file_at)
     
@@ -96,5 +144,6 @@ def read_in_companies(conn, file_path):
 if __name__ == "__main__":
     conn = connect_to_database()
     read_in_companies(conn, '/home/max/MntStn/Apps/Collection/src/resources/companies')
-    #csv_to_sql(conn, '/home/max/MntStn/Apps/Collection/src/resources/companies/ZEVIN_ASSET_MANAGEMENT_LLC/filings/13f-hr-filing/2022/1/13f-hr-data.csv')
+    delete_all_companies(conn, '/home/max/MntStn/Apps/Collection/src/resources/companies')
+    
     conn.close()
