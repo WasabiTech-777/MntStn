@@ -26,10 +26,9 @@ with open(edgarIndexFilePath) as file:
     for line in itertools.islice(file, 11, None):
         #914208|Invesco Ltd.|3|2022-02-10|edgar/data/914208/0001209191-22-008399.txt
         splitLineCompanyInfo = line.strip().split("|")    
-        
         companyName = splitLineCompanyInfo[1].strip()
-        companyName = companyName.replace(' ', '_')
-        
+        companyName = companyName.replace(',', '')
+        companyName = companyName.replace(' ', '-')
         companyFiling = splitLineCompanyInfo[2]
 
         if(companyFiling == "13F-HR"):
