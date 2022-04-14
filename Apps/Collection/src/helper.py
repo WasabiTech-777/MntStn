@@ -131,15 +131,15 @@ class helper:
                     item1 = r"Consolidated Balance Sheets"
                     item2 = r"Consolidated Statements of Operations and Comprehensive Income (Loss)"
                     item3 = r"Consolidated Statements of Operations"
-                    item4 = r"Consolidated Statements of Cash Flows"
-                    item5 = r"Consolidated Statement of Changes in Stockholders' Equity and Changes in Net Assets"
-                    item6 = r"Consolidated Statements of Stockholder's (Deficit) Equity"
-                    report_list = [item1, item2, item3, item4, item5, item6]
+                    item4 = r"Consolidated Statement of Changes in Stockholders' Equity and Changes in Net Assets"
+                    item5 = r"Consolidated Statements of Stockholder's (Deficit) Equity"
+                    report_list = [item1, item2, item3, item4, item5]
 
-                    if ( (report_dict['name_short'] in report_list) and ('contains' in report_dict['name_long']) ):
+                    if report_dict['name_short'] in report_list:
                         statements_url.append(report_dict['url'])
 
                 statements_data = []
+                
                 for statement in statements_url:
                     statement_data = {}
                     statement_data['headers'] = []
@@ -176,39 +176,22 @@ class helper:
                 allData = [obj['data'] for obj in statements_data]
 
                 headersOfFinancialStatements = []
-                logger.info("\n================= allHeaders INFORMATION =========\n")
-                logger.info(f"allHeaders IS: <{allHeaders}>")
                 for headerNestedList in allHeaders:
                     properHeaders = []
                     for headers in headerNestedList:
                         for column in headers:
                             if not (column == "12 Months Ended" or column == "9 Months ended" or column == "3 Months ended"):
-                                #logger.info(f"COLUMN class IS: {type(column)}")
-                                #logger.info(f"COLUMN IS: <{column}>")
                                 properHeaders.append(column)
                     headersOfFinancialStatements.append(properHeaders)
-
-                logger.info("\n================= headersOfFinancialStatements INFORMATION =========\n")
-                logger.info(f"headersOfFinancialStatements IS: <{headersOfFinancialStatements}>")
 
                 headersOfFinancialStatementsColumnLengths = []
                 for index, headers in enumerate(headersOfFinancialStatements):
                     headersOfFinancialStatementsColumnLengths.append(len(headers))
                 dataOfFinancialStatements = []
 
-
-                logger.info("\n================= HEADER INFORMATION =========\n")
-                logger.info(headersOfFinancialStatements)
-
-                logger.info("\n================= data INFORMATION =========\n")
-                logger.info(dataOfFinancialStatements)
-
                 for index, dataNestedList in enumerate(allData):
                     properData = []
                     for data in dataNestedList:
-                        #print(f"DATA is: {len(data)}")
-                        #print(f"len dATA is: {data}")
-                        #print(f"len(headersOfFinancialStatementsColumnLengths) is: {len(headersOfFinancialStatementsColumnLengths)}")
                         if len(data) < headersOfFinancialStatementsColumnLengths[index]:
                             break
                         else:
@@ -217,7 +200,6 @@ class helper:
                 
                 for index, financialStatement in enumerate(dataOfFinancialStatements):
                     dataFrame = pd.DataFrame(financialStatement)
-                    # print(f"\n\n\nindex length: {enumerate(dataOfFinancialStatements)} \n index: {index} \n financial Statement: {financialStatement}\n\n\n")
                     # Define the Index column, rename it, drop the old column after reindexing
                     # fail: raise KeyError(key) from err
                     try:
@@ -241,50 +223,21 @@ class helper:
                     keyList = dataFrame.columns.values.tolist()
                     dict = {}
 
-                    logger.info("\n================= headersOfFinancialStatements INFORMATION =========\n")
-                    logger.info(headersOfFinancialStatements)
-
-                    logger.info("\n================= dataFrame INFORMATION =========\n")
-                    logger.info(dataFrame.to_string())
-
                     for i, key in enumerate(keyList):
-                        logger.info(f"i is: {i} and key is: {key} and keyList is {keyList}")
                         dict[key] = headersOfFinancialStatements[index][i + 1]
 
                     dataFrame.rename(columns=dict, inplace=True)
 
                     reportListName = headersOfFinancialStatements[index][0].strip()
-                    """"
-                    reportListName = reportListName.replace(' ', '')
-                    reportListName = reportListName.replace(' ', '')
-                    reportListName = reportListName.replace('$', '')
-                    reportListName = reportListName.replace(',', '')
-                    reportListName = reportListName.replace(')', '')
-                    reportListName = reportListName.replace('(', '')
-                    reportListName = reportListName.replace('-', '')
-                    reportListName = reportListName.replace(r'/', '')
-                    reportListName = reportListName.replace('\\', '')
-                    """
+
                     reportListName = re.sub('[\$,)(-]', '', reportListName)
                     reportListName = reportListName.replace(r'/', '')
                     reportListName = reportListName.replace('\\', '')
+                    reportListName = reportListName.replace(' ', '-')
 
                     path = f"{os.path.dirname(__file__)}/resources/companies/{companyInfoTuple[0]}/filings/10-k-filing/{companyInfoTuple[3]}/{companyInfoTuple[2]}"
                     p = Path(path)
                     p.mkdir(parents=True,exist_ok=True)
-
-                    #newPath = path + "/"
-                    #p = Path(newPath)
-                    #newP = Path(newPath)
-
-                    #logger.info("\n\n================================================= {path}===========================\n")
-                    #logger.info(path)
-
-                    #logger.info("\n\n================================================= {path}/{reportListName}.csv ===========================\n")
-                    #logger.info(f"{path}/{reportListName}.csv")
-
-                    #logger.info("\n\n================================================= DATA FRAME ===========================\n")
-                    #logger.info(dataFrame.to_string())
 
                     dataFrame.to_csv(f"{path}/{reportListName}.csv", index = True, header = True)
 
