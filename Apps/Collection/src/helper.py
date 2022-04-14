@@ -288,6 +288,8 @@ class helper:
 
                     dataFrame.to_csv(f"{path}/{reportListName}.csv", index = True, header = True)
 
+    def process_10q(filingFile, secApi, companyInfoTuple):
+        pass
 
                 
                 
