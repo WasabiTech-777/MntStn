@@ -32,6 +32,7 @@ with open(edgarIndexFilePath) as file:
         companyFiling = splitLineCompanyInfo[2]
 
         if(companyFiling == "13F-HR"):
+            continue
             companyInfoTuple = (companyName, companyFiling, qtr, yr) 
             fileCounter13fhr += 1
             logger.info(f"Processing 13F-HR for : {companyName}\n")
@@ -42,6 +43,7 @@ with open(edgarIndexFilePath) as file:
 
 
         elif(companyFiling == "10-K"):
+            continue
             companyInfoTuple = (companyName, companyFiling, qtr, yr)
             fileCounter10k += 1
             logger.info(f"Processing 10-K for : {companyName}\n")
