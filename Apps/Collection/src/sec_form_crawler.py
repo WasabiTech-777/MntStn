@@ -53,12 +53,27 @@ with open(edgarIndexFilePath) as file:
             helper.process_10k(filingFile, sec_Api, companyInfoTuple)
         
         elif(companyFiling == "10-Q"):
+            continue
             companyInfoTuple = (companyName, companyFiling, qtr, yr) 
             fileCounter10q += 1
             logger.info(f"Processing 10Q for : {companyName}\n")
             filingFile = sec_Api.get10QFilingForCompanyApi(splitLineCompanyInfo)
+            print(filingFile.content)
             time.sleep(1/10)
             helper.process_10q(filingFile, sec_Api, companyInfoTuple)
+        
+        elif(companyFiling == "8-K"):
+            #continue
+            companyInfoTuple = (companyName, companyFiling, qtr, yr) 
+            fileCounter13fhr += 1
+            logger.info(f"Processing 8-K for : {companyName}\n")
+            filingFile = sec_Api.get8KFilingForCompanyApi(splitLineCompanyInfo)
+            #https://www.sec.gov/Archives/edgar/data/1000045/000095017022000296/index.json
+            #https://www.sec.gov/Archives/edgar/data/1000045/000095017022000296/nick-20220113.xsd
+            print(filingFile)
+            time.sleep(1/10)
+            helper.process_8k(filingFile, sec_Api, companyInfoTuple)
+
 
 
 logger.info("Processed " + str(fileCounter13fhr) + " 13F-HR files in master file.")

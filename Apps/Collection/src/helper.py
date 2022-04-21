@@ -8,7 +8,7 @@ import pandas as pd
 from IPython.display import display
 from bs4 import BeautifulSoup
 from Settings.setup_logger import logging
-from pathlib import Path
+from pathlib import Path 
 
 
 
@@ -103,8 +103,6 @@ class helper:
                 writer.writerow(headerLine)
                 for child in root:
                     self.process_13f_hr_subtree(child, writer)
-                    
-        
 
     def process_10k(filingFile, secApi, companyInfoTuple):
         for file in filingFile.json()['directory']['item']:
@@ -385,4 +383,24 @@ class helper:
 
                     dataFrame.to_csv(f"{path}/{reportListName}.csv", index = True, header = True)
 
-                
+    def process_8k(filingFile, secApi, companyInfoTuple):
+        for file in filingFile.json()['directory']['item']:
+            #file in  {'last-modified': '2022-01-13 07:31:12', 'name': '0000950170-22-000296-index-headers.html', 'type': 'text.gif', 'size': ''}
+            name = file['name']
+            if(name != 'FilingSummary.xml'):
+                continue
+            
+            
+            print(f"name in {name}  file in  {file} \n\n")
+            htmlSummary = secApi.baseUrl + filingFile.json()['directory']['name'] + "/" + file['name']
+            logger.info(f"Searching through: {htmlSummary}")
+            print(f"html sum {htmlSummary} \n\n")
+            base_url = htmlSummary.replace('FilingSummary.xml', '')
+            content = secApi.get(htmlSummary).content
+            #print(content)
+            #time.sleep(10)
+            soup = BeautifulSoup(content, 'html')
+            print(soup.prettify)
+            time.sleep(10)
+            
+            pass
