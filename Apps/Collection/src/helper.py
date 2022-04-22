@@ -1,9 +1,11 @@
 import csv
+from distutils.log import debug
 import re
 import os
 import time
 import xml.etree.ElementTree as ET
 import pandas as pd
+import weasyprint
 
 from IPython.display import display
 from bs4 import BeautifulSoup
@@ -389,18 +391,32 @@ class helper:
             name = file['name']
             if(name != 'FilingSummary.xml'):
                 continue
+
+            xmlSummary = secApi.baseUrl + filingFile.json()['directory']['name'] + "/" + file['name']
+            logger.info(f"Searching through: {xmlSummary}")
+            base_url = xmlSummary.replace('FilingSummary.xml', '')
+            content = secApi.get(xmlSummary).content
+            soup = BeautifulSoup(content, 'xml')
+           
+            end_bit_of_url = soup.find(doctype='8-K').contents[0]
             
+            main_url = base_url + end_bit_of_url
+            logger.info(f"Preforming GET on {main_url}")
             
-            print(f"name in {name}  file in  {file} \n\n")
-            htmlSummary = secApi.baseUrl + filingFile.json()['directory']['name'] + "/" + file['name']
-            logger.info(f"Searching through: {htmlSummary}")
-            print(f"html sum {htmlSummary} \n\n")
-            base_url = htmlSummary.replace('FilingSummary.xml', '')
-            content = secApi.get(htmlSummary).content
-            #print(content)
-            #time.sleep(10)
-            soup = BeautifulSoup(content, 'html')
-            print(soup.prettify)
-            time.sleep(10)
+            content = secApi.get(main_url).content
+            soup = BeautifulSoup(content, 'xml')
             
+            pdf = weasyprint.HTML(main_url).write_pdf()
+            try:
+                open(f'/home/max/MntStn/Apps/Collection/src/resources/8ks/{end_bit_of_url.strip(".htm")}.pdf', 'ab').write(pdf)
+
+                for link in soup.find_all('a'):
+                    attached_url = base_url + link.get('href')
+                    pdf = weasyprint.HTML(attached_url).write_pdf()
+                    open(f'/home/max/MntStn/Apps/Collection/src/resources/8ks/{end_bit_of_url.strip(".htm")}.pdf', 'ab').write(pdf)
+            
+            except(TypeError):
+                logger.error(f"Failed to concatenate str probs cause its <nonetype> lol")
+                time.sleep(1)
+
             pass
