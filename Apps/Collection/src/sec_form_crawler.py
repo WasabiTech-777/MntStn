@@ -18,6 +18,7 @@ edgarIndexFilePath = helper.downloadEdgarIndexFileAndGetPath(response, qtr, yr)
 fileCounter13fhr = 0
 fileCounter10q = 0
 fileCounter10k = 0
+fileCounter8k = 0
 
 
 logger.info(f"{edgarIndexFilePath}")
@@ -32,7 +33,7 @@ with open(edgarIndexFilePath) as file:
         companyFiling = splitLineCompanyInfo[2]
 
         if(companyFiling == "13F-HR"):
-            continue
+            #continue
             companyInfoTuple = (companyName, companyFiling, qtr, yr) 
             fileCounter13fhr += 1
             logger.info(f"Processing 13F-HR for : {companyName}\n")
@@ -43,7 +44,7 @@ with open(edgarIndexFilePath) as file:
 
 
         elif(companyFiling == "10-K"):
-            continue
+            #continue
             companyInfoTuple = (companyName, companyFiling, qtr, yr)
             fileCounter10k += 1
             logger.info(f"Processing 10-K for : {companyName}\n")
@@ -53,7 +54,7 @@ with open(edgarIndexFilePath) as file:
             helper.process_10k(filingFile, sec_Api, companyInfoTuple)
         
         elif(companyFiling == "10-Q"):
-            continue
+            #continue
             companyInfoTuple = (companyName, companyFiling, qtr, yr) 
             fileCounter10q += 1
             logger.info(f"Processing 10Q for : {companyName}\n")
@@ -73,8 +74,11 @@ with open(edgarIndexFilePath) as file:
             print(filingFile)
             time.sleep(1/10)
             helper.process_8k(filingFile, sec_Api, companyInfoTuple)
+            fileCounter8k+=1
 
 
 
 logger.info("Processed " + str(fileCounter13fhr) + " 13F-HR files in master file.")
 logger.info("Processed " + str(fileCounter10k) + " 10k files in master file.")
+logger.info("Processed " + str(fileCounter10q) + " 10q files in master file.")
+logger.info("Processed " + str(fileCounter8k) + " 8k files in master file.")
