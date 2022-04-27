@@ -42,6 +42,13 @@ class SecAPI:
         LOGGER.info(f"Performing GET on: {url}")
         return response
 
+    def get8KFilingForCompanyApi(self, companyInfo):
+        url = f"{self.baseUrl}/Archives/{companyInfo[4]}"
+        url = url.replace('-','').replace('.txt', '/index.json')
+        response = requests.get(url, headers=self.header)
+        LOGGER.info(f"Performing GET on: {url}")
+        return response
+
     def get(self, url):
         response = requests.get(url, headers=self.header)
         LOGGER.info(f"Performing GET on: {url}")

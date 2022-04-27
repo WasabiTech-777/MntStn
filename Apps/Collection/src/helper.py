@@ -1,14 +1,16 @@
 import csv
+from distutils.log import debug
 import re
 import os
 import time
 import xml.etree.ElementTree as ET
 import pandas as pd
+import weasyprint
 
 from IPython.display import display
 from bs4 import BeautifulSoup
 from Settings.setup_logger import logging
-from pathlib import Path
+from pathlib import Path 
 
 
 
@@ -103,8 +105,6 @@ class helper:
                 writer.writerow(headerLine)
                 for child in root:
                     self.process_13f_hr_subtree(child, writer)
-                    
-        
 
     def process_10k(filingFile, secApi, companyInfoTuple):
         for file in filingFile.json()['directory']['item']:
@@ -385,4 +385,38 @@ class helper:
 
                     dataFrame.to_csv(f"{path}/{reportListName}.csv", index = True, header = True)
 
-                
+    def process_8k(filingFile, secApi, companyInfoTuple):
+        for file in filingFile.json()['directory']['item']:
+            #file in  {'last-modified': '2022-01-13 07:31:12', 'name': '0000950170-22-000296-index-headers.html', 'type': 'text.gif', 'size': ''}
+            name = file['name']
+            if(name != 'FilingSummary.xml'):
+                continue
+
+            xmlSummary = secApi.baseUrl + filingFile.json()['directory']['name'] + "/" + file['name']
+            logger.info(f"Searching through: {xmlSummary}")
+            base_url = xmlSummary.replace('FilingSummary.xml', '')
+            content = secApi.get(xmlSummary).content
+            soup = BeautifulSoup(content, 'xml')
+           
+            end_bit_of_url = soup.find(doctype='8-K').contents[0]
+            
+            main_url = base_url + end_bit_of_url
+            logger.info(f"Preforming GET on {main_url}")
+            
+            content = secApi.get(main_url).content
+            soup = BeautifulSoup(content, 'xml')
+            
+            pdf = weasyprint.HTML(main_url).write_pdf()
+            try:
+                open(f'/home/max/MntStn/Apps/Collection/src/resources/8ks/{end_bit_of_url.strip(".htm")}.pdf', 'ab').write(pdf)
+
+                for link in soup.find_all('a'):
+                    attached_url = base_url + link.get('href')
+                    pdf = weasyprint.HTML(attached_url).write_pdf()
+                    open(f'/home/max/MntStn/Apps/Collection/src/resources/8ks/{end_bit_of_url.strip(".htm")}.pdf', 'ab').write(pdf)
+            
+            except(TypeError):
+                logger.error(f"Failed to concatenate str probs cause its <nonetype> lol")
+                time.sleep(1)
+
+            pass
