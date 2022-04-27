@@ -406,17 +406,26 @@ class helper:
             content = secApi.get(main_url).content
             soup = BeautifulSoup(content, 'xml')
             
+
             pdf = weasyprint.HTML(main_url).write_pdf()
+            
+            path = f"{os.path.dirname(__file__)}/resources/companies/{companyInfoTuple[0]}/filings/8-k-filing/{companyInfoTuple[3]}/{companyInfoTuple[2]}"
+            p = Path(path)
+            p.mkdir(parents=True,exist_ok=True)
             try:
-                open(f'/home/max/MntStn/Apps/Collection/src/resources/8ks/{end_bit_of_url.strip(".htm")}.pdf', 'ab').write(pdf)
+                #/home/max/MntStn/Apps/Collection/src/resources/companies
+                
+                open(f'{path}/{end_bit_of_url.strip(".htm")}.pdf', 'ab').write(pdf)
 
                 for link in soup.find_all('a'):
                     attached_url = base_url + link.get('href')
                     pdf = weasyprint.HTML(attached_url).write_pdf()
-                    open(f'/home/max/MntStn/Apps/Collection/src/resources/8ks/{end_bit_of_url.strip(".htm")}.pdf', 'ab').write(pdf)
+                    open(f'{path}/{end_bit_of_url.strip(".htm")}.pdf', 'ab').write(pdf)
             
-            except(TypeError):
-                logger.error(f"Failed to concatenate str probs cause its <nonetype> lol")
+            except TypeError:
+                logger.error(f"Failed to concatenate str probs cause its <nonetype> \n")
                 time.sleep(1)
-
-            pass
+            
+            except:
+                logger.error(f"http 404 not found \n")
+                time.sleep(1)
