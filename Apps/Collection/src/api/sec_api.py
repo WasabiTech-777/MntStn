@@ -34,7 +34,22 @@ class SecAPI:
         LOGGER.info(f"Performing GET on: {url}")
         return response
 
-    def get10kFilingXmlSummaryByFileNameUrl(self, url):
+    def get10QFilingForCompanyApi(self, companyInfo):
+        #914208|Invesco Ltd.|3|2022-02-10|edgar/data/914208/0001209191-22-008399.txt
+        url = f"{self.baseUrl}/Archives/{companyInfo[4]}"
+        url = url.replace('-','').replace('.txt', '/index.json')
+        response = requests.get(url, headers=self.header)
+        LOGGER.info(f"Performing GET on: {url}")
+        return response
+
+    def get8KFilingForCompanyApi(self, companyInfo):
+        url = f"{self.baseUrl}/Archives/{companyInfo[4]}"
+        url = url.replace('-','').replace('.txt', '/index.json')
+        response = requests.get(url, headers=self.header)
+        LOGGER.info(f"Performing GET on: {url}")
+        return response
+
+    def get(self, url):
         response = requests.get(url, headers=self.header)
         LOGGER.info(f"Performing GET on: {url}")
         return response
