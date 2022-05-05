@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Apps",
+    "\\Apps\\Collection",
+    "\\Apps\\Collection\\src",
+    "\\Apps\\Collection\\src\\api",
+    "\\Apps\\Collection\\tests",
+    "\\Apps\\Collection\\tests\\resources",
+    "\\Apps\\Decision",
+    "\\Data_Storage"
+  ],
+  "SelectedNode": "\\Apps\\Collection\\src\\sec_form_crawler.py",
+  "PreviewInSolutionExplorer": false
+}

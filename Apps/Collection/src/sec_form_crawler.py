@@ -19,6 +19,7 @@ fileCounter13fhr = 0
 fileCounter10q = 0
 fileCounter10k = 0
 fileCounter8k = 0
+fileCounterPre14a = 0
 
 
 logger.info(f"{edgarIndexFilePath}")
@@ -76,7 +77,21 @@ with open(edgarIndexFilePath) as file:
             helper.process_8k(filingFile, sec_Api, companyInfoTuple)
             fileCounter8k+=1
 
+        elif(companyFiling == "PRE 14A"):
+            #continue
+            companyInfoTuple = (companyName, companyFiling, qtr, yr) 
+            fileCounterPre14a += 1
+            logger.info(f"Processing PRE 14A for : {companyName}\n")
 
+            # fix this getter
+            filingFile = sec_Api.getPre14aFilingForCompanyApi(splitLineCompanyInfo)
+            print(filingFile)
+            time.sleep(1/10)
+
+            # fix helper
+            helper.process_Pre14a(filingFile, sec_Api, companyInfoTuple)
+
+        #additional file types https://www.sec.gov/oiea/Article/edgarguide.html
 
 logger.info("Processed " + str(fileCounter13fhr) + " 13F-HR files in master file.")
 logger.info("Processed " + str(fileCounter10k) + " 10k files in master file.")

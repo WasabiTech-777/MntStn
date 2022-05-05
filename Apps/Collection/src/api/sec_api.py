@@ -49,6 +49,9 @@ class SecAPI:
         LOGGER.info(f"Performing GET on: {url}")
         return response
 
+    # def getPre14aFilingForCompanyApi(self, companyInfo):
+
+
     def get(self, url):
         response = requests.get(url, headers=self.header)
         LOGGER.info(f"Performing GET on: {url}")
